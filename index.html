@@ -1,6 +1,475 @@
 <!DOCTYPE html>
-<html>
-  <head> 
-  </head>
-<body></body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday! 🎂</title>
+    <style>
+        /* =========================================
+           1. CSS STYLING & VARIABLES
+           ========================================= */
+        :root {
+            --primary: #ffafbd;
+            --secondary: #ffc3a0;
+            --text-dark: #4a4a4a;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            color: var(--text-dark);
+            position: relative;
+        }
+
+        /* Screen Management */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .screen.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Typography & Buttons */
+        h1 { font-size: 2.5rem; margin-bottom: 20px; color: #ff6b81; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        p { font-size: 1.2rem; line-height: 1.6; margin-bottom: 15px; }
+        
+        button {
+            background: #ff6b81;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 129, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 129, 0.6);
+        }
+
+        button:active { transform: translateY(1px); }
+
+        /* Specific Elements */
+        .card {
+            background: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+            transform: translateY(20px);
+            animation: floatUp 0.8s forwards ease-out;
+        }
+
+        .monkey {
+            font-size: 6rem;
+            animation: bounce 2s infinite ease-in-out;
+            cursor: pointer;
+        }
+
+        .sign {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ccc;
+            font-weight: bold;
+            margin-top: -10px;
+            z-index: 10;
+        }
+
+        /* Mini Game */
+        .cake {
+            position: absolute;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .cake:active { transform: scale(0.8); }
+
+        .counter-ribbon {
+            position: absolute;
+            top: 20px;
+            background: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        /* Input / Wish System */
+        input[type="text"] {
+            width: 80%;
+            max-width: 400px;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #ff6b81;
+            border-radius: 10px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.5s ease;
+        }
+
+        .wish-to-ball {
+            transform: scale(0.1) rotate(360deg);
+            border-radius: 50% !important;
+            background: #ff6b81;
+            color: transparent;
+        }
+
+        /* Plinko Canvas */
+        canvas {
+            background: rgba(255,255,255,0.5);
+            border-radius: 15px;
+            max-width: 100%;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        /* Secret System */
+        #secret-trigger {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 999;
+        }
+
+        /* Animations */
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes floatUp { to { transform: translateY(0); } }
+        
+        /* Floating Background Elements */
+        .bg-element {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.3;
+            animation: floatUpBg 10s linear infinite;
+            z-index: -1;
+        }
+        @keyframes floatUpBg {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-20vh) rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-container"></div>
+
+    <audio id="bg-music" loop></audio>
+    <audio id="sfx-click"></audio>
+    <audio id="sfx-plinko"></audio>
+    <audio id="sfx-tada"></audio>
+
+    <div id="screen-landing" class="screen active">
+        <h1>Happy Birthdayy!! 🎉</h1>
+        <div class="monkey" onclick="nextScreen('screen-card')">🐒</div>
+        <div class="sign">Click Me!</div>
+    </div>
+
+    <div id="screen-card" class="screen">
+        <div class="card">
+            <h1>To the Elder One👑</h1>
+            <p>Enter your message</p>
+            <p>enter your message</p>
+            <p>Enter your message</p>
+            <button onclick="startMiniGame()">Click for Mini Game 🎁</button>
+        </div>
+    </div>
+
+    <div id="screen-minigame" class="screen">
+        <div class="counter-ribbon">Cakes Caught: <span id="cake-count">0</span> / 3 🎂</div>
+        <div id="game-area" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0;"></div>
+    </div>
+
+    <div id="screen-wish" class="screen">
+        <div class="card">
+            <h1>Make a Wish ✨</h1>
+            <p>Type out your deepest birthday desire...</p>
+            <input type="text" id="wish-input" placeholder="Write your wish...">
+            <br>
+            <button onclick="submitWish()">Drop into Plinko!</button>
+        </div>
+    </div>
+
+    <div id="screen-plinko" class="screen">
+        <h2 style="margin-bottom: 10px; color: #fff;">Grandma's Game of Fate 👵🎲</h2>
+        <canvas id="plinko-board" width="350" height="500"></canvas>
+    </div>
+
+    <div id="screen-outcome" class="screen">
+        <div class="card">
+            <h1 id="outcome-title">Result!</h1>
+            <p id="outcome-text"></p>
+            <button onclick="location.reload()">Play Again 🔄</button>
+        </div>
+    </div>
+
+    <div id="secret-trigger" onclick="checkSecret()"></div>
+
+    <script>
+        // --- System Settings & Content ---
+        const SECRET_CODES = [
+            { pass: "grandma", msg: "Secret unlocked: You may be older, but you're still the best sister. Happy Birthday!" },
+            { pass: "1234", msg: "Tait, 1234 ni kosle rakhxa hau password" },
+            { pass : "fuchhi", msg:"haha, aafule aafulai fuchhi bhanis" }
+        ];  
+
+        const PLINKO_OUTCOMES = [
+            "Wish denied… try again, elder one 😌",      // Hole 1 (Far Left)
+            "Almost there… just like your youth 😏",       // Hole 2
+            "Grandma luck activated 👵😂",                 // Hole 3
+            "Oho, your wish will be fulfilled ✨",         // Hole 4 (Center - Jackpot)
+            "Still love you though 💖",                    // Hole 5
+            "Your joints are creaky, but the wish is safe",// Hole 6
+            "Maybe next year, oldie 🎂"                    // Hole 7 (Far Right)
+        ];
+
+        // --- Core Functions ---
+        function playSound(id) {
+            const sound = document.getElementById(id);
+            if(sound && sound.src) { sound.currentTime = 0; sound.play().catch(()=>{}); }
+        }
+
+        function nextScreen(screenId) {
+            playSound('sfx-click');
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // --- Background Floating Elements ---
+        function initBackground() {
+            const bg = document.getElementById('bg-container');
+            const icons = ['🎈', '✨', '🎉', '🎊'];
+            for(let i=0; i<15; i++) {
+                let el = document.createElement('div');
+                el.className = 'bg-element';
+                el.innerText = icons[Math.floor(Math.random() * icons.length)];
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                el.style.animationDelay = (Math.random() * 5) + 's';
+                bg.appendChild(el);
+            }
+        }
+        initBackground();
+
+        // --- Mini Game Logic ---
+        let cakesCaught = 0;
+        let gameInterval;
+
+        function startMiniGame() {
+            nextScreen('screen-minigame');
+            cakesCaught = 0;
+            document.getElementById('cake-count').innerText = cakesCaught;
+            spawnCake();
+            gameInterval = setInterval(spawnCake, 800);
+        }
+
+        function spawnCake() {
+            if(cakesCaught >= 3) return;
+            const cake = document.createElement('div');
+            cake.className = 'cake';
+            cake.innerText = '🎂';
+            cake.style.left = Math.random() * 80 + 10 + 'vw';
+            cake.style.top = '-50px';
+            document.getElementById('game-area').appendChild(cake);
+
+            let pos = -50;
+            const fall = setInterval(() => {
+                pos += 3; // Fall speed
+                cake.style.top = pos + 'px';
+                if(pos > window.innerHeight) {
+                    clearInterval(fall);
+                    cake.remove();
+                }
+            }, 20);
+
+            cake.onclick = () => {
+                playSound('sfx-click');
+                clearInterval(fall);
+                cake.remove();
+                cakesCaught++;
+                document.getElementById('cake-count').innerText = cakesCaught;
+                if(cakesCaught >= 3) {
+                    clearInterval(gameInterval);
+                    setTimeout(() => nextScreen('screen-wish'), 500);
+                }
+            };
+        }
+
+        // --- Wish System ---
+        let userWish = "";
+        function submitWish() {
+            const input = document.getElementById('wish-input');
+            if(input.value.trim() === "") return;
+            userWish = input.value;
+            playSound('sfx-click');
+            
+            // Paper crumple animation
+            input.classList.add('wish-to-ball');
+            
+            setTimeout(() => {
+                nextScreen('screen-plinko');
+                initPlinko();
+            }, 800);
+        }
+
+        // --- Plinko Physics Engine ---
+        function initPlinko() {
+            playSound('sfx-plinko');
+            const canvas = document.getElementById('plinko-board');
+            const ctx = canvas.getContext('2d');
+            let w = canvas.width;
+            let h = canvas.height;
+
+            // Physics state
+            let ball = { x: w/2 + (Math.random()*10 - 5), y: 20, r: 8, vx: 0, vy: 0 };
+            let pegs = [];
+            const rows = 10;
+            const cols = 9;
+            const spacingX = w / cols;
+            const spacingY = h / (rows + 2);
+
+            // Generate Pegs (Triangle pattern)
+            for(let row = 0; row < rows; row++) {
+                let y = (row + 1) * spacingY + 30;
+                let isEven = row % 2 === 0;
+                let maxCols = isEven ? cols : cols - 1;
+                let offsetX = isEven ? spacingX/2 : spacingX;
+
+                for(let col = 0; col < maxCols; col++) {
+                    pegs.push({ x: offsetX + col * spacingX, y: y, r: 4 });
+                }
+            }
+
+            // Animation Loop
+            function draw() {
+                ctx.clearRect(0, 0, w, h);
+
+                // Draw Pegs
+                ctx.fillStyle = '#4a4a4a';
+                pegs.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                    ctx.fill();
+                });
+
+                // Draw Buckets (7 zones)
+                ctx.fillStyle = 'rgba(255, 107, 129, 0.2)';
+                for(let i=0; i<7; i++) {
+                    let bx = i * (w/7);
+                    ctx.fillRect(bx, h - 30, w/7 - 2, 30);
+                    // Highlight center bucket
+                    if(i === 3) ctx.fillStyle = 'rgba(255, 215, 0, 0.4)'; 
+                }
+
+                // Draw Ball
+                ctx.fillStyle = '#ff6b81';
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2);
+                ctx.fill();
+
+                // Physics Update
+                ball.vy += 0.2; // Gravity
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+
+                // Wall bounds
+                if(ball.x - ball.r < 0 || ball.x + ball.r > w) ball.vx *= -1;
+
+                // Peg Collision
+                pegs.forEach(p => {
+                    let dx = ball.x - p.x;
+                    let dy = ball.y - p.y;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if(dist < ball.r + p.r) {
+                        ball.vy *= -0.5; // Bounce dampening
+                        ball.vx += (dx / dist) * 2; // Deflect
+                        ball.y = p.y - ball.r - p.r; // Push out
+                    }
+                });
+
+                // End condition
+                if(ball.y > h - 30) {
+                    let bucket = Math.floor(ball.x / (w / 7));
+                    bucket = Math.max(0, Math.min(6, bucket)); // Clamp 0-6
+                    showOutcome(bucket);
+                    return; // Stop animation
+                }
+
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+
+        // --- Outcome Handling ---
+        function showOutcome(bucketIndex) {
+            playSound('sfx-tada');
+            nextScreen('screen-outcome');
+            
+            const titleEl = document.getElementById('outcome-title');
+            const textEl = document.getElementById('outcome-text');
+            
+            if(bucketIndex === 3) {
+                // Jackpot (Center)
+                titleEl.innerText = "🎆 JACKPOT! 🎆";
+                textEl.innerText = `Oho, your wish "${userWish}" will be fulfilled ✨`;
+                // Simple CSS fireworks could trigger here
+            } else {
+                titleEl.innerText = "Let's see...";
+                textEl.innerText = PLINKO_OUTCOMES[bucketIndex];
+            }
+        }
+
+        // --- Secret Password System ---
+        function checkSecret() {
+            const input = prompt("Enter the secret sibling code:");
+            if(!input) return;
+            
+            const match = SECRET_CODES.find(c => c.pass.toLowerCase() === input.toLowerCase());
+            if(match) {
+                alert("✨ SECRET UNLOCKED ✨\n\n" + match.msg);
+            } else {
+                alert("Incorrect! Memory fading already? 👵");
+            }
+        }
+
+        // Optional: Auto-play BGM on first interaction
+        document.body.addEventListener('click', () => {
+            const bgm = document.getElementById('bg-music');
+            if(bgm && bgm.src && bgm.paused) bgm.play().catch(()=>{});
+        }, {once:true});
+
+    </script>
+</body>
 </html>
