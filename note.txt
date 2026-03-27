@@ -6,3 +6,5 @@ things to add:
  -> secret code: k hola kunni?
 
 2) replace monkey with a face photo
+
+3) add a favicon
