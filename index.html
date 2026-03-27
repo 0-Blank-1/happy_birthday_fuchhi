@@ -6,496 +6,584 @@
 <title>Happy Birthday 🎂</title>
 
 <style>
-:root{
-  --primary:#ffafbd;
-  --secondary:#ffc3a0;
-  --accent:#ff6b81;
+/* =========================================
+   1. CSS VARIABLES & BASE STYLING
+   ========================================= */
+:root {
+  --primary: #ffafbd;
+  --secondary: #ffc3a0;
+  --accent: #ff6b81;
+  --text-dark: #4a4a4a;
 }
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Segoe UI',sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none; /* Prevents text highlighting while clicking fast */
 }
 
-body{
-  background:linear-gradient(135deg,var(--primary),var(--secondary));
-  height:100vh;
-  overflow:hidden;
+body {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  color: var(--text-dark);
+  position: relative;
 }
 
-/* SCREEN SYSTEM */
-.screen{
-  position:absolute;
-  width:100%;
-  height:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-direction:column;
-  opacity:0;
-  pointer-events:none;
-  transition:0.5s;
+/* =========================================
+   2. SCREEN SYSTEM
+   ========================================= */
+.screen {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 10;
 }
 
-.screen.active{
-  opacity:1;
-  pointer-events:auto;
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
 }
 
-/* CARD */
-.card{
-  background:rgba(255,255,255,0.9);
-  padding:30px;
-  border-radius:20px;
-  max-width:500px;
-  width:90%;
-  text-align:center;
-  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+/* =========================================
+   3. UI COMPONENTS (CARDS, BUTTONS)
+   ========================================= */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px 30px;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(20px);
+  animation: floatUp 0.6s forwards ease-out;
 }
 
-/* BUTTON */
-button{
-  padding:12px 25px;
-  border:none;
-  border-radius:25px;
-  background:var(--accent);
-  color:white;
-  cursor:pointer;
-  margin-top:15px;
-  font-size:16px;
+button {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 25px;
+  background: var(--accent);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  box-shadow: 0 4px 15px rgba(255, 107, 129, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* MONKEY */
-.monkey{
-  font-size:80px;
-  cursor:pointer;
-  animation:bounce 2s infinite;
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 107, 129, 0.6);
+}
+button:active { transform: translateY(1px); }
+
+/* Landing Page Monkey */
+.monkey {
+  font-size: 100px;
+  cursor: pointer;
+  animation: bounce 2s infinite ease-in-out;
+  margin: 20px 0;
+  filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.2));
 }
 
-@keyframes bounce{
-  50%{transform:translateY(-15px);}
+@keyframes bounce { 
+  0%, 100% { transform: translateY(0); } 
+  50% { transform: translateY(-20px); } 
+}
+@keyframes floatUp { to { transform: translateY(0); } }
+
+/* =========================================
+   4. BACKGROUND ANIMATIONS
+   ========================================= */
+.bg-item {
+  position: absolute;
+  font-size: 30px;
+  opacity: 0.6;
+  z-index: 1;
+  animation: float 10s linear infinite;
 }
 
-/* BACKGROUND FLOAT */
-.bg{
-  position:absolute;
-  font-size:24px;
-  opacity:0.3;
-  animation:float 10s linear infinite;
-}
-@keyframes float{
-  from{transform:translateY(100vh);}
-  to{transform:translateY(-20vh);}
+@keyframes float {
+  0% { transform: translateY(105vh) rotate(0deg); }
+  100% { transform: translateY(-10vh) rotate(360deg); }
 }
 
-/* MINI GAME */
-.cake{
-  position:absolute;
-  font-size:35px;
-  cursor:pointer;
+/* =========================================
+   5. MINI GAME & ENVELOPE
+   ========================================= */
+.cake {
+  position: absolute;
+  font-size: 45px;
+  cursor: pointer;
+  z-index: 100;
+  transition: transform 0.1s;
+}
+.cake:active { transform: scale(0.8); }
+
+#count {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* INPUT */
-input{
-  padding:12px;
-  border-radius:10px;
-  border:2px solid var(--accent);
-  width:80%;
-  text-align:center;
+/* Envelope/Wish */
+#envelope {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  margin: 20px auto;
+  background: #fdfdfd;
+  border: 2px solid #ff6b81;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.8s ease;
 }
 
-/* PLINKO */
-canvas{
-  background:rgba(255,255,255,0.5);
-  border-radius:15px;
+#envelope textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  padding: 15px;
+  font-size: 1.1rem;
+  outline: none;
+  text-align: center;
 }
 
-/* SECRET MODAL */
-#secretModal{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.5);
-  display:none;
-  justify-content:center;
-  align-items:center;
+.flap {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #ff6b81;
+  clip-path: polygon(0 0, 100% 0, 50% 60%);
+  transform-origin: top;
+  transition: transform 0.6s;
+  pointer-events: none;
+  transform: rotateX(180deg); /* Open by default */
 }
 
-.modal-box{
-  background:white;
-  padding:20px;
-  border-radius:15px;
+.fold {
+  transform: scale(0.2) rotate(360deg);
+  border-radius: 50% !important;
+  background: #ff6b81 !important;
+  opacity: 0;
 }
 
-/* FIREWORK */
-.spark{
-  position:absolute;
-  width:6px;
-  height:6px;
-  background:white;
-  border-radius:50%;
-  animation:explode 1s ease-out forwards;
+/* =========================================
+   6. PLINKO & SECRETS
+   ========================================= */
+canvas {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 15px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
 }
 
-  #envelope{
-  position:relative;
-  width:260px;
-  height:150px;
-  margin:20px auto;
-  background:#fff;
-  border-radius:10px;
-  overflow:hidden;
-  transition:0.8s;
+#secretModal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
 }
 
-#envelope textarea{
-  width:100%;
-  height:100%;
-  border:none;
-  resize:none;
-  padding:10px;
-  outline:none;
+.modal-box {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
 }
 
-.flap{
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:#ff6b81;
-  clip-path:polygon(0 0,100% 0,50% 60%);
-  transform-origin:top;
-  transition:0.6s;
+.modal-box input {
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+  width: 80%;
+  font-size: 1.1rem;
+  text-align: center;
 }
 
-/* folding */
-.fold{
-  transform:scale(0.3) rotate(360deg);
-  border-radius:50%;
+.spark {
+  position: absolute;
+  width: 8px; height: 8px;
+  background: gold;
+  border-radius: 50%;
+  animation: explode 1s ease-out forwards;
+  z-index: 1000;
 }
-  
-@keyframes explode{
-  to{
-    transform:translate(var(--x),var(--y));
-    opacity:0;
-  }
+
+@keyframes explode {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- BACKGROUND -->
-<div id="bg"></div>
+<div id="bg-container"></div>
 
-<!-- LANDING -->
 <div class="screen active" id="landing">
-  <h1>Happy Birthdayy!! 🎉</h1>
-  <div class="monkey" onclick="go('card')">🐵</div>
-  <p>Click Me</p>
+  <h1 style="color: white; font-size: 3rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Happy Birthdayy!! 🎉</h1>
+  <div class="monkey" onclick="go('card')">🐒</div>
+  <p style="background: white; padding: 5px 15px; border-radius: 10px; font-weight: bold;">Click the Monkey!</p>
 </div>
 
-<!-- CARD -->
 <div class="screen" id="card">
   <div class="card">
-    <h2>To My Elder Sister 👑</h2>
-    <p>
+    <h2 style="color: #ff6b81; font-size: 2rem; margin-bottom: 15px;">To My Elder Sister 👑</h2>
+    <p style="font-size: 1.2rem; line-height: 1.6;">
       Happy Birthday 😏<br><br>
       You’re officially getting older… like seriously 👵😂<br>
       Grandma update incoming soon.<br><br>
       But still… my favorite annoying human 💖
     </p>
-
     <button onclick="startGame()">Mini Game 🎁</button>
-    <button onclick="openSecret()">🔐 Secret</button>
+    <br>
+    <button onclick="openSecret()" style="background: #ccc; color: #333; margin-top: 10px; padding: 10px 20px; font-size: 0.9rem;">🔐 Secret Code</button>
   </div>
 </div>
 
-<!-- GAME -->
 <div class="screen" id="game">
-  <h2>Click 3 Cakes 🎂</h2>
-  <p id="count">0 / 3</p>
+  <h2 style="color: white; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Catch 3 Cakes 🎂</h2>
+  <div id="count">0 / 3</div>
 </div>
 
-<!-- WISH -->
 <div class="screen" id="wish">
   <div class="card">
-    <h2>Make a Wish ✨</h2>
-
+    <h2 style="color: #ff6b81; margin-bottom: 10px;">Make a Wish ✨</h2>
     <div id="envelope">
-      <textarea id="wishInput" placeholder="Write your wish..."></textarea>
+      <textarea id="wishInput" placeholder="Write your birthday wish..."></textarea>
       <div class="flap"></div>
     </div>
-
-    <button onclick="drop()">Seal & Drop 🎯</button>
+    <button onclick="dropWish()">Seal & Drop 🎯</button>
   </div>
 </div>
 
-<!-- PLINKO -->
 <div class="screen" id="plinko">
-  <canvas id="board" width="320" height="450"></canvas>
+  <h2 style="color: white; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Grandma's Fate 🎲</h2>
+  <canvas id="board" width="340" height="450"></canvas>
 </div>
 
-<!-- RESULT -->
 <div class="screen" id="result">
   <div class="card">
-    <h2 id="resultTitle"></h2>
-    <p id="resultText"></p>
-    <button onclick="location.reload()">Again 🔄</button>
+    <h2 id="resultTitle" style="color: #ff6b81; font-size: 2rem; margin-bottom: 10px;"></h2>
+    <p id="resultText" style="font-size: 1.3rem;"></p>
+    <button onclick="location.reload()">Play Again 🔄</button>
   </div>
 </div>
 
-<!-- SECRET -->
 <div id="secretModal">
   <div class="modal-box">
-    <h3>Enter Code</h3>
-    <input id="secretInput">
+    <h3 style="color: #ff6b81;">Enter Code</h3>
+    <input type="text" id="secretInput" placeholder="Password...">
+    <br>
     <button onclick="checkSecret()">Unlock</button>
+    <button onclick="closeSecret()" style="background: #ccc;">Cancel</button>
   </div>
 </div>
 
 <script>
-
-/* SCREEN NAV */
-function go(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+/* =========================================
+   SCREEN NAVIGATION
+   ========================================= */
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
-/* BACKGROUND */
-for(let i=0;i<20;i++){
-  let b=document.createElement("div");
-  b.className="bg";
-  b.innerText=["🎈","✨","🎉"][Math.floor(Math.random()*3)];
-  b.style.left=Math.random()*100+"vw";
-  b.style.animationDuration=(5+Math.random()*5)+"s";
-  document.getElementById("bg").appendChild(b);
+/* =========================================
+   BACKGROUND GENERATOR (Balloons & Confetti)
+   ========================================= */
+function createBackground() {
+  const container = document.getElementById("bg-container");
+  const items = ["🎈", "✨", "🎉", "🎊", "🎂"];
+  
+  for(let i = 0; i < 25; i++) {
+    let b = document.createElement("div");
+    b.className = "bg-item";
+    b.innerText = items[Math.floor(Math.random() * items.length)];
+    b.style.left = Math.random() * 100 + "vw";
+    // Randomize speed and delay
+    b.style.animationDuration = (8 + Math.random() * 10) + "s";
+    b.style.animationDelay = (Math.random() * 5) + "s";
+    // Randomize size slightly
+    b.style.fontSize = (20 + Math.random() * 20) + "px";
+    container.appendChild(b);
+  }
 }
+createBackground();
 
-/* MINI GAME */
-let count=0;
-function startGame(){
+/* =========================================
+   MINI GAME LOGIC
+   ========================================= */
+let cakesCaught = 0;
+let gameSpawner;
+
+function startGame() {
   go("game");
-  count=0;
-  document.getElementById("count").innerText="0 / 3";
+  cakesCaught = 0;
+  document.getElementById("count").innerText = "0 / 3";
 
-  let interval=setInterval(()=>{
-    if(count>=3){clearInterval(interval); setTimeout(()=>go("wish"),500); return;}
+  // Spawn a cake every 800ms
+  gameSpawner = setInterval(() => {
+    if(cakesCaught >= 3) {
+      clearInterval(gameSpawner);
+      setTimeout(() => go("wish"), 600);
+      return;
+    }
 
-    let c=document.createElement("div");
-    c.className="cake";
-    c.innerText="🎂";
-    c.style.left=Math.random()*90+"%";
-    c.style.top="-40px";
-    document.body.appendChild(c);
+    let cake = document.createElement("div");
+    cake.className = "cake";
+    cake.innerText = "🎂";
+    cake.style.left = (Math.random() * 80 + 10) + "%"; // Keep within screen bounds
+    cake.style.top = "-50px";
+    document.getElementById("game").appendChild(cake);
 
-    let fall=setInterval(()=>{
-      c.style.top=(c.offsetTop+4)+"px";
-      if(c.offsetTop>window.innerHeight){c.remove(); clearInterval(fall);}
-    },20);
+    let pos = -50;
+    // Fall animation loop
+    let fallInterval = setInterval(() => {
+      pos += 4; // Fall speed
+      cake.style.top = pos + "px";
+      
+      // Remove if it falls off screen
+      if(pos > window.innerHeight) {
+        cake.remove();
+        clearInterval(fallInterval);
+      }
+    }, 20);
 
-    c.onclick=()=>{
-      c.remove();
-      count++;
-      document.getElementById("count").innerText=count+" / 3";
+    // Click event to catch cake
+    cake.onclick = () => {
+      cake.remove();
+      clearInterval(fallInterval);
+      cakesCaught++;
+      document.getElementById("count").innerText = cakesCaught + " / 3";
     };
 
-  },800);
+  }, 800);
 }
 
-/* WISH + PLINKO */
-let wishText="";
-function drop(){
-  wishText = document.getElementById("wishInput").value;
-  if(!wishText) return;
+/* =========================================
+   WISH TO PLINKO TRANSITION
+   ========================================= */
+let userWishText = "";
+
+function dropWish() {
+  userWishText = document.getElementById("wishInput").value.trim();
+  if(!userWishText) {
+    alert("You have to write a wish first! 🙄");
+    return;
+  }
 
   let env = document.getElementById("envelope");
   let flap = document.querySelector(".flap");
 
-  // close flap
-  flap.style.transform = "rotateX(180deg)";
+  // 1. Close the envelope flap
+  flap.style.transform = "rotateX(0deg)";
 
-  setTimeout(()=>{
-    env.classList.add("fold"); // turn into ball
-  },500);
+  // 2. Turn envelope into a ball
+  setTimeout(() => {
+    env.classList.add("fold");
+  }, 600);
 
-  setTimeout(()=>{
+  // 3. Go to Plinko
+  setTimeout(() => {
     go("plinko");
-    plinko();
-  },1200);
+    startPlinko();
+  }, 1400);
 }
 
-function plinko(){
-  let canvas=document.getElementById("board");
-  let ctx=canvas.getContext("2d");
+/* =========================================
+   PLINKO PHYSICS ENGINE
+   ========================================= */
+function startPlinko() {
+  const canvas = document.getElementById("board");
+  const ctx = canvas.getContext("2d");
+  
+  let pegs = [];
+  let w = canvas.width;
+  let h = canvas.height;
+  
+  // Create triangle peg pattern
+  const rows = 9;
+  const cols = 8;
+  const spacingX = w / cols;
+  const spacingY = (h - 60) / rows;
 
-  let pegs=[];
-  let spacing=40;
+  for(let row = 0; row < rows; row++) {
+    let y = (row + 1) * spacingY + 20;
+    let isEven = row % 2 === 0;
+    let maxCols = isEven ? cols : cols - 1;
+    let offsetX = isEven ? spacingX/2 : spacingX;
 
-  for(let y=60;y<400;y+=40){
-    for(let x=20;x<300;x+=40){
-      pegs.push({
-        x:x+(y%80?20:0),
-        y:y
-      });
+    for(let col = 0; col < maxCols; col++) {
+      pegs.push({ x: offsetX + col * spacingX, y: y, r: 4 });
     }
   }
 
-  let ball={
-    x:160,
-    y:10,
-    vx:(Math.random()-0.5)*2,
-    vy:0,
-    r:6
+  // Initial Ball State
+  let ball = { 
+    x: w / 2 + (Math.random() * 10 - 5), // Drop slightly off-center
+    y: 10, 
+    vx: 0, 
+    vy: 0, 
+    r: 8 
   };
 
-  function draw(){
-    ctx.clearRect(0,0,320,450);
+  function drawFrame() {
+    ctx.clearRect(0, 0, w, h);
 
-    // draw pegs
-    pegs.forEach(p=>{
+    // Draw Pegs
+    ctx.fillStyle = "#666";
+    pegs.forEach(p => {
       ctx.beginPath();
-      ctx.arc(p.x,p.y,3,0,Math.PI*2);
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fill();
     });
 
-    // draw ball
+    // Draw Bottom Zones (7 slots)
+    ctx.fillStyle = "rgba(255, 107, 129, 0.2)";
+    for(let i = 0; i < 7; i++) {
+      ctx.fillRect(i * (w/7), h - 30, w/7 - 2, 30);
+      if(i === 3) ctx.fillStyle = "rgba(255, 215, 0, 0.4)"; // Highlight center
+    }
+
+    // Draw Ball
+    ctx.fillStyle = "#ff6b81";
     ctx.beginPath();
-    ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
     ctx.fill();
 
-    // gravity
-    ball.vy += 0.25;
-
-    // move
+    // Physics
+    ball.vy += 0.25; // Gravity
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    // wall bounce
-    if(ball.x < 0 || ball.x > 320) ball.vx *= -1;
+    // Wall bounces
+    if(ball.x - ball.r < 0 || ball.x + ball.r > w) ball.vx *= -1;
 
-    // peg collision
-    pegs.forEach(p=>{
+    // Peg Collisions
+    pegs.forEach(p => {
       let dx = ball.x - p.x;
       let dy = ball.y - p.y;
       let dist = Math.sqrt(dx*dx + dy*dy);
 
-      if(dist < ball.r + 3){
-        ball.vy *= -0.5;
-        ball.vx += (dx/dist) * 1.5;
-        ball.y = p.y - ball.r - 3;
+      if(dist < ball.r + p.r) {
+        ball.vy *= -0.5; // Dampen bounce
+        ball.vx += (dx / dist) * 2; // Deflect
+        ball.y = p.y - ball.r - p.r; // Push out to prevent sticking
       }
     });
 
-    // bottom
-    if(ball.y > 420){
-      let slot = Math.floor(ball.x/(320/7));
-      outcome(slot);
-      return;
+    // Check if ball reached the bottom buckets
+    if(ball.y > h - 30) {
+      let slotWidth = w / 7;
+      let slot = Math.floor(ball.x / slotWidth);
+      slot = Math.max(0, Math.min(6, slot)); // Ensure it's between 0-6
+      triggerOutcome(slot);
+      return; // Stop the animation loop
     }
 
-    requestAnimationFrame(draw);
+    requestAnimationFrame(drawFrame);
   }
 
-  draw();
+  drawFrame(); // Start loop
 }
 
-  function draw(){
-    ctx.clearRect(0,0,320,450);
-
-    // pegs
-    for(let y=50;y<400;y+=40){
-      for(let x=20;x<300;x+=40){
-        ctx.beginPath();
-        ctx.arc(x+(y%80?20:0),y,3,0,6.28);
-        ctx.fill();
-      }
-    }
-
-    // ball
-    ctx.beginPath();
-    ctx.arc(ball.x,ball.y,6,0,6.28);
-    ctx.fill();
-
-    ball.vy+=0.2;
-    ball.x+=ball.vx;
-    ball.y+=ball.vy;
-
-    if(ball.x<0||ball.x>320)ball.vx*=-1;
-
-    if(ball.y>420){
-      let slot=Math.floor(ball.x/(320/7));
-      outcome(slot);
-      return;
-    }
-
-    requestAnimationFrame(draw);
-  }
-  draw();
-}
-
-/* RESULT */
-function outcome(slot){
+/* =========================================
+   OUTCOME & FIREWORKS
+   ========================================= */
+function triggerOutcome(slot) {
   go("result");
 
-  let msgs=[
-    "Grandma luck 👵😂",
-    "Almost youth 😏",
-    "Not today 😂",
-    "JACKPOT",
-    "Still love you 💖",
-    "Old bones survived 😏",
-    "Try next year 🎂"
+  const msgs = [
+    "Wish denied… try again, elder one 😌",      // Slot 0
+    "Almost there… just like your youth 😏",       // Slot 1
+    "Grandma luck activated 👵😂",                 // Slot 2
+    "JACKPOT",                                     // Slot 3 (Center)
+    "Still love you though 💖",                    // Slot 4
+    "Your joints are creaky, but wish is safe",    // Slot 5
+    "Maybe next year, oldie 🎂"                    // Slot 6
   ];
 
-  if(slot===3){
-    document.getElementById("resultTitle").innerText="🎆 JACKPOT 🎆";
-    document.getElementById("resultText").innerText=
-    `Oho, "${wishText}" will be fulfilled ✨`;
+  if(slot === 3) {
+    document.getElementById("resultTitle").innerText = "🎆 JACKPOT 🎆";
+    document.getElementById("resultText").innerText = `Oho, "${userWishText}" will be fulfilled ✨`;
     fireworks();
-  }else{
-    document.getElementById("resultTitle").innerText="Hmm...";
-    document.getElementById("resultText").innerText=msgs[slot];
+  } else {
+    document.getElementById("resultTitle").innerText = "Let's see...";
+    document.getElementById("resultText").innerText = msgs[slot];
   }
 }
 
-/* FIREWORK */
-function fireworks(){
-  for(let i=0;i<50;i++){
-    let s=document.createElement("div");
-    s.className="spark";
-    s.style.left="50%";
-    s.style.top="50%";
-    s.style.setProperty("--x",(Math.random()*200-100)+"px");
-    s.style.setProperty("--y",(Math.random()*200-100)+"px");
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(),1000);
+function fireworks() {
+  for(let i = 0; i < 60; i++) {
+    let spark = document.createElement("div");
+    spark.className = "spark";
+    spark.style.left = "50%";
+    spark.style.top = "50%";
+    
+    // Randomize explosion direction
+    let xTarget = (Math.random() * 300 - 150) + "px";
+    let yTarget = (Math.random() * 300 - 150) + "px";
+    
+    // Assign CSS variables for the keyframe animation
+    spark.style.setProperty("--x", xTarget);
+    spark.style.setProperty("--y", yTarget);
+    
+    // Randomize colors
+    let colors = ['#ff6b81', '#ffc3a0', 'gold', 'white'];
+    spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+    
+    document.body.appendChild(spark);
+    
+    // Clean up DOM after animation
+    setTimeout(() => spark.remove(), 1000);
   }
 }
 
-/* SECRET */
-function openSecret(){
-  document.getElementById("secretModal").style.display="flex";
+/* =========================================
+   SECRET MODAL LOGIC
+   ========================================= */
+function openSecret() { document.getElementById("secretModal").style.display = "flex"; }
+function closeSecret() { 
+  document.getElementById("secretModal").style.display = "none"; 
+  document.getElementById("secretInput").value = "";
 }
 
-function checkSecret(){
-  let val=document.getElementById("secretInput").value.toLowerCase();
+function checkSecret() {
+  let val = document.getElementById("secretInput").value.toLowerCase().trim();
 
-  let secrets={
-    "grandma":"Still best sister 💖",
-    "fuchhi":"caught you 😂"
+  let secrets = {
+    "grandma": "Secret Unlocked: You may be older, but you're still the best sister. 💖",
+    "fuchhi": "Haha caught you! Happy Birthday! 😂🎉"
   };
 
-  alert(secrets[val] || "Wrong 👵");
-  document.getElementById("secretModal").style.display="none";
+  if(secrets[val]) {
+    alert("✨ UNLOCKED ✨\n\n" + secrets[val]);
+    closeSecret();
+  } else {
+    alert("Incorrect! Memory fading already? 👵");
+  }
 }
-
 </script>
-
 </body>
 </html>
