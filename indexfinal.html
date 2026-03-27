@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="images/monkey.png">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday 🎂</title>
+
+<style>
+/* =========================================
+   1. CSS VARIABLES & BASE STYLING
+   ========================================= */
+:root {
+  --primary: #ffafbd;
+  --secondary: #ffc3a0;
+  --accent: #ff6b81;
+  --text-dark: #4a4a4a;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}
+
+body {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  color: var(--text-dark);
+  position: relative;
+}
+
+/* =========================================
+   2. SCREEN SYSTEM
+   ========================================= */
+.screen {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  z-index: 10;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* =========================================
+   3. UI COMPONENTS (CARDS, BUTTONS)
+   ========================================= */
+.card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 40px 30px;
+  border-radius: 20px;
+  max-width: 515px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(20px);
+  animation: floatUp 0.6s forwards ease-out;
+}
+
+button {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 25px;
+  background: var(--accent);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
+  box-shadow: 0 4px 15px rgba(255, 107, 129, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(255, 107, 129, 0.6);
+}
+button:active { transform: translateY(1px); }
+
+/* Landing Page Monkey */
+.monkey {
+  font-size: 100px;
+  cursor: pointer;
+  animation: bounce 2s infinite ease-in-out;
+  margin: 20px 0;
+  filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.2));
+}
+
+@keyframes bounce { 
+  0%, 100% { transform: translateY(0); } 
+  50% { transform: translateY(-20px); } 
+}
+@keyframes floatUp { to { transform: translateY(0); } }
+
+/* =========================================
+   4. BACKGROUND ANIMATIONS
+   ========================================= */
+.bg-item {
+  position: absolute;
+  font-size: 30px;
+  opacity: 0.6;
+  z-index: 1;
+  animation: float 10s linear infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(105vh) rotate(0deg); }
+  100% { transform: translateY(-10vh) rotate(360deg); }
+}
+
+.letter {
+  opacity: 0;
+  display: inline-block;
+  animation: fadeInLetter 0.1s forwards;
+}
+
+@keyframes fadeInLetter {
+  to { opacity: 1; transform: translateY(0); }
+}
+/* =========================================
+   5. MINI GAME & ENVELOPE
+   ========================================= */
+.cake {
+  position: absolute;
+  font-size: 45px;
+  cursor: pointer;
+  z-index: 100;
+  transition: transform 0.1s;
+}
+.cake:active { transform: scale(0.8); }
+
+#count {
+  font-size: 1.5rem;
+  font-weight: bold;
+  background: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  margin-top: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Envelope/Wish */
+#envelope {
+  position: relative;
+  width: 97%;
+  height: 150px;
+  margin: 19px auto;
+  background: #fdfdfd;
+  border: 2px solid #ff6b81;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: all 0.8s ease;
+}
+
+#envelope textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  padding: 15px;
+  font-size: 1.1rem;
+  outline: none;
+  text-align: center;
+}
+
+.flap {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: #ff6b81;
+  clip-path: polygon(0 0, 100% 0, 50% 60%);
+  transform-origin: top;
+  transition: transform 0.6s;
+  pointer-events: none;
+  transform: rotateX(180deg);
+}
+
+.fold {
+  transform: scale(0.2) rotate(360deg);
+  border-radius: 50% !important;
+  background: #ff6b81 !important;
+  opacity: 0;
+}
+
+/* =========================================
+   6. PLINKO & SECRETS
+   ========================================= */
+canvas {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 15px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+}
+
+#secretModal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+}
+
+.modal-box input {
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 8px;
+  border: 2px solid var(--accent);
+  width: 80%;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.spark {
+  position: absolute;
+  width: 8px; height: 8px;
+  background: gold;
+  border-radius: 50%;
+  animation: explode 1s ease-out forwards;
+  z-index: 1000;
+}
+
+@keyframes explode {
+  0% { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)) scale(0); opacity: 0; }
+}
+</style>
+</head>
+
+<body>
+
+<audio id="snd-syabas" src="Syabas.m4a"></audio>
+<audio id="snd-hpbd" src="Hpbdsong.m4a" loop></audio>
+<audio id="snd-sakxas" src="sakxas_khelna.m4a"></audio>
+<audio id="snd-jitdainas" src="Jitdainas.m4a"></audio>
+<audio id="snd-kkholan" src="Kkholan.m4a"></audio>
+<audio id="snd-mother" src="Mother'sMSG.m4a"></audio>
+
+<div id="bg-container"></div>
+
+<div class="screen active" id="landing">
+  <h1 style="color: white; font-size: 3rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Happy Birthdayy DD💝</h1>
+  <div class="monkey" onclick="enterCard()">🧠</div>
+  <p style="background: white; padding: 5px 15px; border-radius: 10px; font-weight: bold; font-size: 21px;">Dimag</p>
+</div>
+
+<div class="screen" id="card">
+  <div class="card">
+    <h2 style="color: #ff6b81; font-size: 2rem; margin-bottom: 15px;">To the Older Sister👑</h2>
+    <p style="font-size: 1.2rem; line-height: 1.6;">
+      <strong>Happy Birthday DD!🥳🎂🎈🎊 <br></strong>
+     May this birthday bring tons and tons of moneyy!!💸 Aani malai dinu, ma bank ma jamma garidinxu.😽<br>
+      You are doing great and keep on progressing! <br>YOU GOT THIS!!🫶💝<br>
+    If it gets harder, then I am Here for you and so is mom and dad.👨‍👩‍👧‍👦
+    </p>
+    <button onclick="startGame()">Mini Game 🎁</button>
+    <br>
+    <button onclick="openSecret()" style="background: #ccc; color: #333; margin-top: 10px; padding: 10px 20px; font-size: 0.9rem;">🔐 Secret Code</button>
+  </div>
+</div>
+
+<div class="screen" id="game">
+  <h2 style="color: white; font-size: 2.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Catch 3 Cakes 🎂</h2>
+  <div id="count">0 / 3</div>
+</div>
+
+<div class="screen" id="wish">
+  <div class="card">
+    <h2 style="color: #ff6b81; margin-bottom: 10px;">Make a Wish ✨</h2>
+    <div id="envelope">
+      <textarea id="wishInput" placeholder="Write your birthday wish..."></textarea>
+      <div class="flap"></div>
+    </div>
+    <button onclick="dropWish()">Seal & Drop 🎯</button>
+  </div>
+</div>
+
+<div class="screen" id="plinko">
+  <h2 style="color: white; margin-bottom: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">Grandma's Fate 🎲</h2>
+  <canvas id="board" width="340" height="450"></canvas>
+</div>
+
+<div class="screen" id="result">
+  <div class="card">
+    <h2 id="resultTitle" style="color: #ff6b81; font-size: 2rem; margin-bottom: 10px;"></h2>
+    <p id="resultText" style="font-size: 1.3rem;"></p>
+    <button onclick="location.reload()">Play Again 🔄</button>
+  </div>
+</div>
+
+<div id="secretModal">
+  <div class="modal-box">
+    <h3 style="color: #ff6b81;">Enter Code</h3>
+    <input type="text" id="secretInput" placeholder="Password...">
+    <br>
+    <button onclick="checkSecret()">Unlock</button>
+    <button onclick="closeSecret()" style="background: #ccc;">Cancel</button>
+  </div>
+</div>
+
+<script>
+/* =========================================
+   AUDIO CONTROLLER SYSTEM
+   ========================================= */
+function playAudio(id) {
+  let snd = document.getElementById(id);
+  if(snd) {
+    snd.currentTime = 0;
+    snd.play().catch(e => console.log("Audio play blocked by browser:", e));
+  }
+}
+
+function stopAudio(id) {
+  let snd = document.getElementById(id);
+  if(snd) {
+    snd.pause();
+    snd.currentTime = 0;
+  }
+}
+
+function enterCard() {
+  playAudio('snd-syabas'); 
+  
+  setTimeout(() => {
+    let bg = document.getElementById('snd-hpbd');
+    if(bg) {
+      bg.volume = 0.5; 
+      bg.play().catch(e => console.log("BG music blocked:", e));
+    }
+  }, 1500); 
+
+  go('card');
+}
+
+/* =========================================
+   SCREEN NAVIGATION
+   ========================================= */
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* =========================================
+   BACKGROUND GENERATOR
+   ========================================= */
+function createBackground() {
+  const container = document.getElementById("bg-container");
+  const items = ["🎈", "✨", "🎉", "🎊", "🎂"];
+  
+  for(let i = 0; i < 25; i++) {
+    let b = document.createElement("div");
+    b.className = "bg-item";
+    b.innerText = items[Math.floor(Math.random() * items.length)];
+    b.style.left = Math.random() * 100 + "vw";
+    b.style.animationDuration = (8 + Math.random() * 10) + "s";
+    b.style.animationDelay = (Math.random() * 5) + "s";
+    b.style.fontSize = (20 + Math.random() * 20) + "px";
+    container.appendChild(b);
+  }
+}
+createBackground();
+
+/* =========================================
+   MINI GAME LOGIC
+   ========================================= */
+let cakesCaught = 0;
+let gameSpawner;
+
+function startGame() {
+  stopAudio('snd-hpbd'); // Stops the background song
+  playAudio('snd-sakxas'); 
+  go("game");
+  cakesCaught = 0;
+  document.getElementById("count").innerText = "0 / 3";
+
+  gameSpawner = setInterval(() => {
+    if(cakesCaught >= 3) {
+      clearInterval(gameSpawner);
+      setTimeout(() => go("wish"), 600);
+      return;
+    }
+
+    let cake = document.createElement("div");
+    cake.className = "cake";
+    cake.innerText = "🎂";
+    cake.style.left = (Math.random() * 80 + 10) + "%"; 
+    cake.style.top = "-50px";
+    document.getElementById("game").appendChild(cake);
+
+    let pos = -50;
+    let fallInterval = setInterval(() => {
+      pos += 4; 
+      cake.style.top = pos + "px";
+      
+      if(pos > window.innerHeight) {
+        cake.remove();
+        clearInterval(fallInterval);
+      }
+    }, 20);
+
+    cake.onclick = () => {
+      cake.remove();
+      clearInterval(fallInterval);
+      cakesCaught++;
+      document.getElementById("count").innerText = cakesCaught + " / 3";
+    };
+
+  }, 800);
+}
+
+/* =========================================
+   WISH TO PLINKO TRANSITION
+   ========================================= */
+let userWishText = "";
+
+function dropWish() {
+  playAudio('snd-jitdainas'); 
+
+  userWishText = document.getElementById("wishInput").value.trim();
+  if(!userWishText) {
+    alert("Budheskal lagyo ki kya ho? \nLekhna tero wish🙄");
+    return;
+  }
+
+  let env = document.getElementById("envelope");
+  let flap = document.querySelector(".flap");
+
+  flap.style.transform = "rotateX(0deg)";
+
+  setTimeout(() => {
+    env.classList.add("fold");
+  }, 600);
+
+  setTimeout(() => {
+    go("plinko");
+    startPlinko();
+  }, 1400);
+}
+
+/* =========================================
+   PLINKO PHYSICS ENGINE & COLORS
+   ========================================= */
+let xPositions = []; // To store the custom slot boundaries
+
+function startPlinko() {
+  const canvas = document.getElementById("board");
+  const ctx = canvas.getContext("2d");
+  
+  let pegs = [];
+  let w = canvas.width;
+  let h = canvas.height;
+  
+  const rows = 9;
+  const cols = 8;
+  const spacingX = w / cols;
+  const spacingY = (h - 60) / rows;
+
+  for(let row = 0; row < rows; row++) {
+    let y = (row + 1) * spacingY + 20;
+    let isEven = row % 2 === 0;
+    let maxCols = isEven ? cols : cols - 1;
+    let offsetX = isEven ? spacingX/2 : spacingX;
+
+    for(let col = 0; col < maxCols; col++) {
+      pegs.push({ x: offsetX + col * spacingX, y: y, r: 4 });
+    }
+  }
+
+  // Define slot widths: The 4th box is 2 units wide, the others are 1 unit wide. (Total 8 units)
+  xPositions = [0, 1, 2, 3, 5, 6, 7, 8].map(v => v * (w / 8));
+
+  let ball = { 
+    x: w / 2 + (Math.random() * 10 - 5), 
+    y: 10, 
+    vx: 0, 
+    vy: 0, 
+    r: 8 
+  };
+
+  function drawFrame() {
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw Pegs
+    ctx.fillStyle = "#666";
+    pegs.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Draw Bottom Zones (7 slots) with updated colors and wider middle box
+    for(let i = 0; i < 7; i++) {
+      let slotX = xPositions[i];
+      let slotW = xPositions[i+1] - xPositions[i];
+
+      if (i === 3) {
+        ctx.fillStyle = "rgba(255, 215, 0, 0.7)"; // Slot 4 (Center) - Brighter Gold
+      } else if (i === 0 || i === 6) {
+        ctx.fillStyle = "rgba(139, 0, 0, 0.6)";   // Slot 1 & 7 - Dark Red (No blending!)
+      } else if (i === 1 || i === 5) {
+        ctx.fillStyle = "rgba(0, 120, 215, 0.5)"; // Slot 2 & 6 - Stronger Blue
+      } else if (i === 2 || i === 4) {
+        ctx.fillStyle = "rgba(34, 139, 34, 0.5)"; // Slot 3 & 5 - Forest Green
+      }
+      ctx.fillRect(slotX, h - 30, slotW - 2, 30);
+    }
+
+    // Draw Ball
+    ctx.fillStyle = "#ff6b81";
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Physics
+    ball.vy += 0.25; 
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    if(ball.x - ball.r < 0 || ball.x + ball.r > w) ball.vx *= -1;
+
+    pegs.forEach(p => {
+      let dx = ball.x - p.x;
+      let dy = ball.y - p.y;
+      let dist = Math.sqrt(dx*dx + dy*dy);
+
+      if(dist < ball.r + p.r) {
+        ball.vy *= -0.5; 
+        ball.vx += (dx / dist) * 2; 
+        ball.y = p.y - ball.r - p.r; 
+      }
+    });
+
+    if(ball.y > h - 30) {
+      let slot = 0;
+      for(let i = 0; i < 7; i++) {
+        if (ball.x >= xPositions[i] && ball.x <= xPositions[i+1]) {
+          slot = i;
+          break;
+        }
+      }
+      slot = Math.max(0, Math.min(6, slot)); 
+      triggerOutcome(slot);
+      return; 
+    }
+
+    requestAnimationFrame(drawFrame);
+  }
+
+  drawFrame(); 
+}
+
+/* =========================================
+   OUTCOME & FIREWORKS
+   ========================================= */
+function triggerOutcome(slot) {
+  go("result");
+
+  const msgs = [
+    "Tait, yetro tadha aayo ball😔",            // Slot 0
+    "Close but no cigar😼",                     // Slot 1
+    "Grandma luck activated 👵😂",                 // Slot 2
+    "JACKPOT",                                      // Slot 3 (Center)
+    "Kei xaina, better luck next time💖",          // Slot 4
+    "Yo ni ali tadha nai bhayo ta😗",      // Slot 5
+    "Hait, yeta ball aayo ta aayo kasari?🤔"       // Slot 6
+  ];
+
+  if(slot === 3) {
+    document.getElementById("resultTitle").innerText = "🎆 JACKPOT 🎆";
+    document.getElementById("resultText").innerText = `Oho, "${userWishText}" ta pura hunxa jasto xa ta✨`;
+    fireworks();
+  } else {
+    document.getElementById("resultTitle").innerText = "hmmm...";
+    document.getElementById("resultText").innerText = msgs[slot];
+  }
+}
+
+function fireworks() {
+  for(let i = 0; i < 60; i++) {
+    let spark = document.createElement("div");
+    spark.className = "spark";
+    spark.style.left = "50%";
+    spark.style.top = "50%";
+    
+    let xTarget = (Math.random() * 300 - 150) + "px";
+    let yTarget = (Math.random() * 300 - 150) + "px";
+    
+    spark.style.setProperty("--x", xTarget);
+    spark.style.setProperty("--y", yTarget);
+    
+    let colors = ['#ff6b81', '#ffc3a0', 'gold', 'white'];
+    spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+    
+    document.body.appendChild(spark);
+    
+    setTimeout(() => spark.remove(), 1000);
+  }
+}
+
+/* =========================================
+   SECRET MODAL LOGIC
+   ========================================= */
+// 1. Store the original HTML of the modal so we can reset it
+const originalModalHTML = `
+    <h3 style="color: #ff6b81;">Enter Code</h3>
+    <input type="text" id="secretInput" placeholder="Password...">
+    <br>
+    <button onclick="checkSecret()">Unlock</button>
+    <button onclick="closeSecret()" style="background: #ccc;">Cancel</button>
+`;
+
+function openSecret() { 
+  stopAudio('snd-hpbd'); 
+  playAudio('snd-kkholan'); 
+  // Ensure it's the input screen when opened
+  document.querySelector(".modal-box").innerHTML = originalModalHTML;
+  document.getElementById("secretModal").style.display = "flex"; 
+}
+
+function closeSecret() { 
+  document.getElementById("secretModal").style.display = "none";
+  // Reset the content for the next time it's opened
+  document.querySelector(".modal-box").innerHTML = originalModalHTML;
+}
+
+function checkSecret() {
+  let val = document.getElementById("secretInput").value.toLowerCase().trim();
+  let modalBox = document.querySelector(".modal-box");
+
+  let secrets = {
+    "grandma": "Budho bhayis tara kei xaina, You still are the best sister!💖💝",
+    "fuchhi": "Haha aafu le aafu lai fuchhi bhanis!😂🎉",
+    "mummy": "Secret Voice Message loading...",
+  };
+
+  if (secrets[val]) {
+    let message = secrets[val];
+    
+    if (val === "mummy") {
+      playAudio('snd-mother');
+    }
+
+    // Clear and show the animated reveal
+    modalBox.innerHTML = `
+      <h3 style="color: #ff6b81; margin-bottom: 15px;">✨ UNLOCKED ✨</h3>
+      <div id="typewriter-text" style="font-size: 1.2rem; min-height: 50px; margin-bottom: 20px; color: #4a4a4a;"></div>
+    `;
+    
+    const container = document.getElementById("typewriter-text");
+    let speed = (val === "mummy") ? (2000 / message.length) : 50;
+    let charIndex = 0;
+
+    function type() {
+      if (charIndex < message.length) {
+        let span = document.createElement("span");
+        span.className = "letter";
+        
+        // FIX: If it's a space, use a non-breaking space so it doesn't collapse
+        if (message[charIndex] === " ") {
+          span.innerHTML = "&nbsp;"; 
+        } else {
+          span.innerText = message[charIndex];
+        }
+
+        container.appendChild(span);
+        charIndex++;
+        setTimeout(type, speed);
+      } else {
+        // ... (rest of your button logic)
+      }
+    }
+    type();
+
+  } else {
+    alert("Incorrect! Memory fading already? 👵");
+  }
+}
+</script>
+</body>
+</html>
