@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday 🎂</title>
+
+<style>
+:root{
+  --primary:#ffafbd;
+  --secondary:#ffc3a0;
+  --accent:#ff6b81;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Segoe UI',sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  height:100vh;
+  overflow:hidden;
+}
+
+/* SCREEN SYSTEM */
+.screen{
+  position:absolute;
+  width:100%;
+  height:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  opacity:0;
+  pointer-events:none;
+  transition:0.5s;
+}
+
+.screen.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* CARD */
+.card{
+  background:rgba(255,255,255,0.9);
+  padding:30px;
+  border-radius:20px;
+  max-width:500px;
+  width:90%;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* BUTTON */
+button{
+  padding:12px 25px;
+  border:none;
+  border-radius:25px;
+  background:var(--accent);
+  color:white;
+  cursor:pointer;
+  margin-top:15px;
+  font-size:16px;
+}
+
+/* MONKEY */
+.monkey{
+  font-size:80px;
+  cursor:pointer;
+  animation:bounce 2s infinite;
+}
+
+@keyframes bounce{
+  50%{transform:translateY(-15px);}
+}
+
+/* BACKGROUND FLOAT */
+.bg{
+  position:absolute;
+  font-size:24px;
+  opacity:0.3;
+  animation:float 10s linear infinite;
+}
+@keyframes float{
+  from{transform:translateY(100vh);}
+  to{transform:translateY(-20vh);}
+}
+
+/* MINI GAME */
+.cake{
+  position:absolute;
+  font-size:35px;
+  cursor:pointer;
+}
+
+/* INPUT */
+input{
+  padding:12px;
+  border-radius:10px;
+  border:2px solid var(--accent);
+  width:80%;
+  text-align:center;
+}
+
+/* PLINKO */
+canvas{
+  background:rgba(255,255,255,0.5);
+  border-radius:15px;
+}
+
+/* SECRET MODAL */
+#secretModal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-box{
+  background:white;
+  padding:20px;
+  border-radius:15px;
+}
+
+/* FIREWORK */
+.spark{
+  position:absolute;
+  width:6px;
+  height:6px;
+  background:white;
+  border-radius:50%;
+  animation:explode 1s ease-out forwards;
+}
+@keyframes explode{
+  to{
+    transform:translate(var(--x),var(--y));
+    opacity:0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- BACKGROUND -->
+<div id="bg"></div>
+
+<!-- LANDING -->
+<div class="screen active" id="landing">
+  <h1>Happy Birthdayy!! 🎉</h1>
+  <div class="monkey" onclick="go('card')">🐵</div>
+  <p>Click Me</p>
+</div>
+
+<!-- CARD -->
+<div class="screen" id="card">
+  <div class="card">
+    <h2>To My Elder Sister 👑</h2>
+    <p>
+      Happy Birthday 😏<br><br>
+      You’re officially getting older… like seriously 👵😂<br>
+      Grandma update incoming soon.<br><br>
+      But still… my favorite annoying human 💖
+    </p>
+
+    <button onclick="startGame()">Mini Game 🎁</button>
+    <button onclick="openSecret()">🔐 Secret</button>
+  </div>
+</div>
+
+<!-- GAME -->
+<div class="screen" id="game">
+  <h2>Click 3 Cakes 🎂</h2>
+  <p id="count">0 / 3</p>
+</div>
+
+<!-- WISH -->
+<div class="screen" id="wish">
+  <div class="card">
+    <h2>Make a Wish ✨</h2>
+    <input id="wishInput" placeholder="Write your wish...">
+    <button onclick="drop()">Drop 🎯</button>
+  </div>
+</div>
+
+<!-- PLINKO -->
+<div class="screen" id="plinko">
+  <canvas id="board" width="320" height="450"></canvas>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="result">
+  <div class="card">
+    <h2 id="resultTitle"></h2>
+    <p id="resultText"></p>
+    <button onclick="location.reload()">Again 🔄</button>
+  </div>
+</div>
+
+<!-- SECRET -->
+<div id="secretModal">
+  <div class="modal-box">
+    <h3>Enter Code</h3>
+    <input id="secretInput">
+    <button onclick="checkSecret()">Unlock</button>
+  </div>
+</div>
+
+<script>
+
+/* SCREEN NAV */
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* BACKGROUND */
+for(let i=0;i<20;i++){
+  let b=document.createElement("div");
+  b.className="bg";
+  b.innerText=["🎈","✨","🎉"][Math.floor(Math.random()*3)];
+  b.style.left=Math.random()*100+"vw";
+  b.style.animationDuration=(5+Math.random()*5)+"s";
+  document.getElementById("bg").appendChild(b);
+}
+
+/* MINI GAME */
+let count=0;
+function startGame(){
+  go("game");
+  count=0;
+  document.getElementById("count").innerText="0 / 3";
+
+  let interval=setInterval(()=>{
+    if(count>=3){clearInterval(interval); setTimeout(()=>go("wish"),500); return;}
+
+    let c=document.createElement("div");
+    c.className="cake";
+    c.innerText="🎂";
+    c.style.left=Math.random()*90+"%";
+    c.style.top="-40px";
+    document.body.appendChild(c);
+
+    let fall=setInterval(()=>{
+      c.style.top=(c.offsetTop+4)+"px";
+      if(c.offsetTop>window.innerHeight){c.remove(); clearInterval(fall);}
+    },20);
+
+    c.onclick=()=>{
+      c.remove();
+      count++;
+      document.getElementById("count").innerText=count+" / 3";
+    };
+
+  },800);
+}
+
+/* WISH + PLINKO */
+let wishText="";
+function drop(){
+  wishText=document.getElementById("wishInput").value;
+  if(!wishText)return;
+  go("plinko");
+  plinko();
+}
+
+function plinko(){
+  let canvas=document.getElementById("board");
+  let ctx=canvas.getContext("2d");
+
+  let ball={x:160,y:10,vx:(Math.random()-0.5)*1,vy:0};
+
+  function draw(){
+    ctx.clearRect(0,0,320,450);
+
+    // pegs
+    for(let y=50;y<400;y+=40){
+      for(let x=20;x<300;x+=40){
+        ctx.beginPath();
+        ctx.arc(x+(y%80?20:0),y,3,0,6.28);
+        ctx.fill();
+      }
+    }
+
+    // ball
+    ctx.beginPath();
+    ctx.arc(ball.x,ball.y,6,0,6.28);
+    ctx.fill();
+
+    ball.vy+=0.2;
+    ball.x+=ball.vx;
+    ball.y+=ball.vy;
+
+    if(ball.x<0||ball.x>320)ball.vx*=-1;
+
+    if(ball.y>420){
+      let slot=Math.floor(ball.x/(320/7));
+      outcome(slot);
+      return;
+    }
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+/* RESULT */
+function outcome(slot){
+  go("result");
+
+  let msgs=[
+    "Grandma luck 👵😂",
+    "Almost youth 😏",
+    "Not today 😂",
+    "JACKPOT",
+    "Still love you 💖",
+    "Old bones survived 😏",
+    "Try next year 🎂"
+  ];
+
+  if(slot===3){
+    document.getElementById("resultTitle").innerText="🎆 JACKPOT 🎆";
+    document.getElementById("resultText").innerText=
+    `Oho, "${wishText}" will be fulfilled ✨`;
+    fireworks();
+  }else{
+    document.getElementById("resultTitle").innerText="Hmm...";
+    document.getElementById("resultText").innerText=msgs[slot];
+  }
+}
+
+/* FIREWORK */
+function fireworks(){
+  for(let i=0;i<50;i++){
+    let s=document.createElement("div");
+    s.className="spark";
+    s.style.left="50%";
+    s.style.top="50%";
+    s.style.setProperty("--x",(Math.random()*200-100)+"px");
+    s.style.setProperty("--y",(Math.random()*200-100)+"px");
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1000);
+  }
+}
+
+/* SECRET */
+function openSecret(){
+  document.getElementById("secretModal").style.display="flex";
+}
+
+function checkSecret(){
+  let val=document.getElementById("secretInput").value.toLowerCase();
+
+  let secrets={
+    "grandma":"Still best sister 💖",
+    "fuchhi":"caught you 😂"
+  };
+
+  alert(secrets[val] || "Wrong 👵");
+  document.getElementById("secretModal").style.display="none";
+}
+
+</script>
+
+</body>
+</html>
