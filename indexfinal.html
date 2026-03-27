@@ -647,7 +647,7 @@ function checkSecret() {
   let modalBox = document.querySelector(".modal-box");
 
   let secrets = {
-    "grandma": "Budho bhayis tara kei xaina, You still are the best sister!💖💝",
+    "grandma": "Budho bhayis tara kei xaina, You still are the best sister!💖",
     "fuchhi": "Haha aafu le aafu lai fuchhi bhanis!😂🎉",
     "mummy": "Secret Voice Message loading...",
   };
@@ -659,41 +659,48 @@ function checkSecret() {
       playAudio('snd-mother');
     }
 
-    // Clear and show the animated reveal
+    // Prepare the modal
     modalBox.innerHTML = `
       <h3 style="color: #ff6b81; margin-bottom: 15px;">✨ UNLOCKED ✨</h3>
       <div id="typewriter-text" style="font-size: 1.2rem; min-height: 50px; margin-bottom: 20px; color: #4a4a4a;"></div>
+      <div id="modal-button-container"></div>
     `;
     
     const container = document.getElementById("typewriter-text");
-    let speed = (val === "mummy") ? (2000 / message.length) : 50;
+    const buttonContainer = document.getElementById("modal-button-container");
+    
+    // This Array.from fix prevents the  symbols by handling emojis correctly
+    let charArray = Array.from(message); 
+    let speed = (val === "mummy") ? (2000 / charArray.length) : 50;
     let charIndex = 0;
 
     function type() {
-      if (charIndex < message.length) {
+      if (charIndex < charArray.length) {
         let span = document.createElement("span");
         span.className = "letter";
         
-        // FIX: If it's a space, use a non-breaking space so it doesn't collapse
-        if (message[charIndex] === " ") {
+        if (charArray[charIndex] === " ") {
           span.innerHTML = "&nbsp;"; 
         } else {
-          span.innerText = message[charIndex];
+          span.innerText = charArray[charIndex];
         }
 
         container.appendChild(span);
         charIndex++;
         setTimeout(type, speed);
       } else {
-        // ... (rest of your button logic)
+        // THE FIX: Explicitly add the button once the loop finishes
+        buttonContainer.innerHTML = `<button onclick="closeSecret()">Close</button>`;
       }
     }
+    
     type();
 
   } else {
     alert("Incorrect! Memory fading already? 👵");
   }
 }
+
 </script>
 </body>
 </html>
