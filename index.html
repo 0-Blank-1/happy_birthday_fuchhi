@@ -140,6 +140,45 @@ canvas{
   border-radius:50%;
   animation:explode 1s ease-out forwards;
 }
+
+  #envelope{
+  position:relative;
+  width:260px;
+  height:150px;
+  margin:20px auto;
+  background:#fff;
+  border-radius:10px;
+  overflow:hidden;
+  transition:0.8s;
+}
+
+#envelope textarea{
+  width:100%;
+  height:100%;
+  border:none;
+  resize:none;
+  padding:10px;
+  outline:none;
+}
+
+.flap{
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#ff6b81;
+  clip-path:polygon(0 0,100% 0,50% 60%);
+  transform-origin:top;
+  transition:0.6s;
+}
+
+/* folding */
+.fold{
+  transform:scale(0.3) rotate(360deg);
+  border-radius:50%;
+}
+  
 @keyframes explode{
   to{
     transform:translate(var(--x),var(--y));
@@ -187,8 +226,13 @@ canvas{
 <div class="screen" id="wish">
   <div class="card">
     <h2>Make a Wish ✨</h2>
-    <input id="wishInput" placeholder="Write your wish...">
-    <button onclick="drop()">Drop 🎯</button>
+
+    <div id="envelope">
+      <textarea id="wishInput" placeholder="Write your wish..."></textarea>
+      <div class="flap"></div>
+    </div>
+
+    <button onclick="drop()">Seal & Drop 🎯</button>
   </div>
 </div>
 
@@ -267,17 +311,99 @@ function startGame(){
 /* WISH + PLINKO */
 let wishText="";
 function drop(){
-  wishText=document.getElementById("wishInput").value;
-  if(!wishText)return;
-  go("plinko");
-  plinko();
+  wishText = document.getElementById("wishInput").value;
+  if(!wishText) return;
+
+  let env = document.getElementById("envelope");
+  let flap = document.querySelector(".flap");
+
+  // close flap
+  flap.style.transform = "rotateX(180deg)";
+
+  setTimeout(()=>{
+    env.classList.add("fold"); // turn into ball
+  },500);
+
+  setTimeout(()=>{
+    go("plinko");
+    plinko();
+  },1200);
 }
 
 function plinko(){
   let canvas=document.getElementById("board");
   let ctx=canvas.getContext("2d");
 
-  let ball={x:160,y:10,vx:(Math.random()-0.5)*1,vy:0};
+  let pegs=[];
+  let spacing=40;
+
+  for(let y=60;y<400;y+=40){
+    for(let x=20;x<300;x+=40){
+      pegs.push({
+        x:x+(y%80?20:0),
+        y:y
+      });
+    }
+  }
+
+  let ball={
+    x:160,
+    y:10,
+    vx:(Math.random()-0.5)*2,
+    vy:0,
+    r:6
+  };
+
+  function draw(){
+    ctx.clearRect(0,0,320,450);
+
+    // draw pegs
+    pegs.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,3,0,Math.PI*2);
+      ctx.fill();
+    });
+
+    // draw ball
+    ctx.beginPath();
+    ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);
+    ctx.fill();
+
+    // gravity
+    ball.vy += 0.25;
+
+    // move
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    // wall bounce
+    if(ball.x < 0 || ball.x > 320) ball.vx *= -1;
+
+    // peg collision
+    pegs.forEach(p=>{
+      let dx = ball.x - p.x;
+      let dy = ball.y - p.y;
+      let dist = Math.sqrt(dx*dx + dy*dy);
+
+      if(dist < ball.r + 3){
+        ball.vy *= -0.5;
+        ball.vx += (dx/dist) * 1.5;
+        ball.y = p.y - ball.r - 3;
+      }
+    });
+
+    // bottom
+    if(ball.y > 420){
+      let slot = Math.floor(ball.x/(320/7));
+      outcome(slot);
+      return;
+    }
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+}
 
   function draw(){
     ctx.clearRect(0,0,320,450);
